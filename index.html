@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -6,48 +6,111 @@
       {
         "imports": {
           "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.webgpu.js",
-          "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.webgpu.js"
+          "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.webgpu.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/"
         }
       }
     </script>
     <script type="module">
-      import * as THREE from "three/webgpu";
+        import * as THREE from "three";
+        import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+        import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-      // サイズを指定
-      const width = 960;
-      const height = 540;
+        // サイズを指定
+        const width = 960;
+        const height = 540;
 
-      // レンダラーを作成
-      const renderer = new THREE.WebGPURenderer({
-        canvas: document.querySelector("#myCanvas"),
-      });
-      renderer.setPixelRatio(devicePixelRatio);
-      renderer.setSize(width, height);
+        // レンダラーを作成
+        const canvasElement = document.querySelector("#myCanvas");
+        const renderer = new THREE.WebGPURenderer({
+            canvas: canvasElement,
+        });
+        renderer.setPixelRatio(devicePixelRatio);
+        renderer.setSize(width, height);
 
-      renderer.setAnimationLoop(tick);
+        renderer.setAnimationLoop(tick);
 
-      // シーンを作成
-      const scene = new THREE.Scene();
-      scene.background = new THREE.Color(0x000000);
+        // シーンを作成
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x000000);
 
-      // カメラを作成
-      const camera = new THREE.PerspectiveCamera(45, width / height);
-      camera.position.set(0, 0, +1000);
+        // カメラを作成
+        const camera = new THREE.PerspectiveCamera(45, width / height, 0.001, 10000);
+        // カメラの初期座標を設定
+        camera.position.set(10, 10, 10);
 
-      // 箱を作成
-      const geometry = new THREE.BoxGeometry(400, 400, 400);
-      const material = new THREE.MeshNormalMaterial();
-      const box = new THREE.Mesh(geometry, material);
-      scene.add(box);
+        // カメラコントローラーを作成
+        const controls = new OrbitControls(camera, canvasElement);
+        controls.target.set(0, 0, 0);
+        controls.update();
 
-      // 毎フレーム時に実行されるループイベントです
-      function tick() {
-        box.rotation.y += 0.01;
-        renderer.render(scene, camera); // レンダリング
-      }
+        // 平行光源を作成
+        // 上から照らす
+        const directionalLight = new THREE.DirectionalLight(0xffffff);
+        directionalLight.position.set(1, 1, 1);
+        scene.add(directionalLight);
+
+        // 横からテラス
+        const directionalLight2 = new THREE.DirectionalLight(0xffffff);
+        directionalLight2.position.set(1, 0, 1);
+        scene.add(directionalLight2);
+
+        const light = new THREE.AmbientLight(0xffffff, 2);
+        scene.add(light);
+
+        // // GLTF形式のモデルデータを読み込む
+        // const loader = new GLTFLoader();
+        // // GLTFファイルのパスを指定
+        // const objects = await loader.loadAsync("./models/OkayamaStation/gltf/52330703_bldg_6697_op/52330703_bldg_6697_op.glb");
+        // // 読み込み後に3D空間に追加
+        // const model = objects.scene;
+        // scene.add(model);
+
+        // GLTF形式のモデルデータを読み込む
+        const loader = new GLTFLoader();
+        // 非同期処理で待機するのでasync function宣言とする
+        async function loadmodel(path) {
+            // GLTFファイルのパスを指定
+            const gltf = await loader.loadAsync(path);
+            // 読み込み後に3D空間に追加
+            const model = gltf.scene;
+            scene.add(model);
+
+            // 強制調整
+            model.scale.set(0.01, 0.01, 0.01);
+
+            // バウンディングボックスでサイズ取得
+            const box = new THREE.Box3().setFromObject(model);
+            const center = box.getCenter(new THREE.Vector3());
+            const size = box.getSize(new THREE.Vector3());
+
+
+
+            controls.update();
+        }
+        
+        loadmodel("./models/OkayamaStation/gltf/513377_dem_6697_50_op/513377_dem_6697_50_op.glb")
+        loadmodel("./models/OkayamaStation/gltf/523307_dem_6697_00_op/523307_dem_6697_00_op.glb")
+        loadmodel("./models/OkayamaStation/gltf/51337793_bldg_6697_op/51337793_bldg_6697_op.glb")
+        loadmodel("./models/OkayamaStation/gltf/51337793_tran_6697_op/51337793_tran_6697_op.glb")
+        loadmodel("./models/OkayamaStation/gltf/51337794_bldg_6697_op/51337794_bldg_6697_op.glb")
+        loadmodel("./models/OkayamaStation/gltf/51337794_tran_6697_op/51337794_tran_6697_op.glb")
+        loadmodel("./models/OkayamaStation/gltf/52330703_bldg_6697_op/52330703_bldg_6697_op.glb")
+        loadmodel("./models/OkayamaStation/gltf/52330703_tran_6697_op/52330703_tran_6697_op.glb")
+        loadmodel("./models/OkayamaStation/gltf/52330704_bldg_6697_op/52330704_bldg_6697_op.glb")
+        loadmodel("./models/OkayamaStation/gltf/52330704_tran_6697_op/52330704_tran_6697_op.glb")
+
+
+        // 毎フレーム時に実行されるループイベントです
+        function tick() {
+        // レンダリング
+        renderer.render(scene, camera);
+        }
     </script>
   </head>
   <body>
     <canvas id="myCanvas"></canvas>
   </body>
 </html>
+
+<!-- "./models/OkayamaStation/bldg/52330703_bldg_6697_op/52330703_bldg_6697_op.glb" -->

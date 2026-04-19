@@ -1,116 +1,131 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8" />
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.webgpu.js",
-          "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.182.0/build/three.webgpu.js",
-          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.182.0/examples/jsm/"
-        }
-      }
-    </script>
-    <script type="module">
-        import * as THREE from "three";
-        import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-        import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-
-        // サイズを指定
-        const width = 960;
-        const height = 540;
-
-        // レンダラーを作成
-        const canvasElement = document.querySelector("#myCanvas");
-        const renderer = new THREE.WebGPURenderer({
-            canvas: canvasElement,
-        });
-        renderer.setPixelRatio(devicePixelRatio);
-        renderer.setSize(width, height);
-
-        renderer.setAnimationLoop(tick);
-
-        // シーンを作成
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x000000);
-
-        // カメラを作成
-        const camera = new THREE.PerspectiveCamera(45, width / height, 0.001, 10000);
-        // カメラの初期座標を設定
-        camera.position.set(10, 10, 10);
-
-        // カメラコントローラーを作成
-        const controls = new OrbitControls(camera, canvasElement);
-        controls.target.set(0, 0, 0);
-        controls.update();
-
-        // 平行光源を作成
-        // 上から照らす
-        const directionalLight = new THREE.DirectionalLight(0xffffff);
-        directionalLight.position.set(1, 1, 1);
-        scene.add(directionalLight);
-
-        // 横からテラス
-        const directionalLight2 = new THREE.DirectionalLight(0xffffff);
-        directionalLight2.position.set(1, 0, 1);
-        scene.add(directionalLight2);
-
-        const light = new THREE.AmbientLight(0xffffff, 2);
-        scene.add(light);
-
-        // // GLTF形式のモデルデータを読み込む
-        // const loader = new GLTFLoader();
-        // // GLTFファイルのパスを指定
-        // const objects = await loader.loadAsync("./models/OkayamaStation/gltf/52330703_bldg_6697_op/52330703_bldg_6697_op.glb");
-        // // 読み込み後に3D空間に追加
-        // const model = objects.scene;
-        // scene.add(model);
-
-        // GLTF形式のモデルデータを読み込む
-        const loader = new GLTFLoader();
-        // 非同期処理で待機するのでasync function宣言とする
-        async function loadmodel(path) {
-            // GLTFファイルのパスを指定
-            const gltf = await loader.loadAsync(path);
-            // 読み込み後に3D空間に追加
-            const model = gltf.scene;
-            scene.add(model);
-
-            // 強制調整
-            model.scale.set(0.01, 0.01, 0.01);
-
-            // バウンディングボックスでサイズ取得
-            const box = new THREE.Box3().setFromObject(model);
-            const center = box.getCenter(new THREE.Vector3());
-            const size = box.getSize(new THREE.Vector3());
-
-
-
-            controls.update();
-        }
-        
-        loadmodel("./models/OkayamaStation/gltf/513377_dem_6697_50_op/513377_dem_6697_50_op.glb")
-        loadmodel("./models/OkayamaStation/gltf/523307_dem_6697_00_op/523307_dem_6697_00_op.glb")
-        loadmodel("./models/OkayamaStation/gltf/51337793_bldg_6697_op/51337793_bldg_6697_op.glb")
-        loadmodel("./models/OkayamaStation/gltf/51337793_tran_6697_op/51337793_tran_6697_op.glb")
-        loadmodel("./models/OkayamaStation/gltf/51337794_bldg_6697_op/51337794_bldg_6697_op.glb")
-        loadmodel("./models/OkayamaStation/gltf/51337794_tran_6697_op/51337794_tran_6697_op.glb")
-        loadmodel("./models/OkayamaStation/gltf/52330703_bldg_6697_op/52330703_bldg_6697_op.glb")
-        loadmodel("./models/OkayamaStation/gltf/52330703_tran_6697_op/52330703_tran_6697_op.glb")
-        loadmodel("./models/OkayamaStation/gltf/52330704_bldg_6697_op/52330704_bldg_6697_op.glb")
-        loadmodel("./models/OkayamaStation/gltf/52330704_tran_6697_op/52330704_tran_6697_op.glb")
-
-
-        // 毎フレーム時に実行されるループイベントです
-        function tick() {
-        // レンダリング
-        renderer.render(scene, camera);
-        }
-    </script>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Unity WebGL Player | Okayama Station for WebGL</title>
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
   </head>
   <body>
-    <canvas id="myCanvas"></canvas>
+    <div id="unity-container" class="unity-desktop">
+      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-warning"> </div>
+      <div id="unity-footer">
+        <div id="unity-webgl-logo"></div>
+        <div id="unity-fullscreen-button"></div>
+        <div id="unity-build-title">Okayama Station for WebGL</div>
+      </div>
+    </div>
+    <script>
+
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      var warningBanner = document.querySelector("#unity-warning");
+
+      // Shows a temporary message banner/ribbon for a few seconds, or
+      // a permanent error message on top of the canvas if type=='error'.
+      // If type=='warning', a yellow highlight color is used.
+      // Modify or remove this function to customize the visually presented
+      // way that non-critical warnings and error messages are presented to the
+      // user.
+      function unityShowBanner(msg, type) {
+        function updateBannerVisibility() {
+          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
+        }
+        var div = document.createElement('div');
+        div.innerHTML = msg;
+        warningBanner.appendChild(div);
+        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        else {
+          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          setTimeout(function() {
+            warningBanner.removeChild(div);
+            updateBannerVisibility();
+          }, 5000);
+        }
+        updateBannerVisibility();
+      }
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/OkayamaStationWebGL.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/OkayamaStationWebGL.data",
+        frameworkUrl: buildUrl + "/OkayamaStationWebGL.framework.js",
+        codeUrl: buildUrl + "/OkayamaStationWebGL.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "Okayama Station for WebGL",
+        productVersion: "0.1",
+        showBanner: unityShowBanner,
+      };
+
+      // By default, Unity keeps WebGL canvas render target size matched with
+      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
+      // Set this to false if you want to decouple this synchronization from
+      // happening inside the engine, and you would instead like to size up
+      // the canvas DOM size and WebGL render target sizes yourself.
+      // config.matchWebGLToCanvasSize = false;
+
+      // If you would like all file writes inside Unity Application.persistentDataPath
+      // directory to automatically persist so that the contents are remembered when
+      // the user revisits the site the next time, uncomment the following line:
+      // config.autoSyncPersistentDataPath = true;
+      // This autosyncing is currently not the default behavior to avoid regressing
+      // existing user projects that might rely on the earlier manual
+      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
+      // expected to change.
+
+      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+        // Mobile device style: fill the whole browser client area with the game canvas:
+
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
+        document.getElementsByTagName('head')[0].appendChild(meta);
+        container.className = "unity-mobile";
+        canvas.className = "unity-mobile";
+
+        // To lower canvas resolution on mobile devices to gain some
+        // performance, uncomment the following line:
+        // config.devicePixelRatio = 1;
+
+
+      } else {
+        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
+
+        canvas.style.width = "960px";
+        canvas.style.height = "600px";
+      }
+
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+              }).then((unityInstance) => {
+                loadingBar.style.display = "none";
+                fullscreenButton.onclick = () => {
+                  unityInstance.SetFullscreen(1);
+                };
+              }).catch((message) => {
+                alert(message);
+              });
+            };
+
+      document.body.appendChild(script);
+
+    </script>
   </body>
 </html>
-
-<!-- "./models/OkayamaStation/bldg/52330703_bldg_6697_op/52330703_bldg_6697_op.glb" -->
